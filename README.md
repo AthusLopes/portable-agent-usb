@@ -1,23 +1,45 @@
-# Portable Agent USB
+<p align="center">
+  <img src="assets/banner.svg" alt="Portable Agent USB" width="900"/>
+</p>
 
-Run Claude Code and OpenAI Codex from a USB drive on any Windows or Linux PC. No installation needed on the host machine.
+<p align="center">
+  <strong>Run Claude Code and OpenAI Codex from a USB drive. No installation needed.</strong>
+</p>
 
-Plug in. Click launcher. Work. Unplug. No traces left.
+<p align="center">
+  <a href="https://github.com/bnovik0v/portable-agent-usb/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/node-v22-green.svg" alt="Node.js">
+  <img src="https://img.shields.io/badge/Claude%20Code-supported-orange.svg" alt="Claude Code">
+  <img src="https://img.shields.io/badge/OpenAI%20Codex-supported-brightgreen.svg" alt="OpenAI Codex">
+</p>
 
-## What's Inside
+<p align="center">
+  Plug in &rarr; Launch &rarr; Code &rarr; Unplug. No traces left on the host machine.
+</p>
 
-- **Portable Node.js** for Windows and Linux (no install)
-- **Claude Code** and **Codex CLI** pre-installed
-- **Your skills, CLAUDE.md, and config** — all on the drive
-- **All temp/cache** redirected to the USB — nothing written to host
+---
+
+## Why?
+
+You're at a friend's place. Their code is broken. You want to help — but installing Node.js, Claude Code, API keys... too much hassle on someone else's machine.
+
+**Portable Agent USB** is a flash drive with everything pre-loaded. Plug it in, open a terminal, and your AI coding agent is ready. When you're done, unplug — nothing was installed.
+
+## Features
+
+- **Zero install** — portable Node.js runs directly from the USB
+- **Claude Code + Codex CLI** — both agents, ready to use
+- **Cross-platform** — works on Windows and Linux (x64)
+- **OAuth support** — log in with your Claude Pro/Max or ChatGPT Plus subscription
+- **Your config travels with you** — CLAUDE.md, skills, and settings on the drive
+- **No traces** — all temp files, cache, and config stay on the USB
 
 ## Quick Start
 
 ### 1. Build the USB
 
-Format a USB drive as **exFAT** (works on both Windows and Linux).
-
-Then run the setup script from your Linux machine:
+Format a USB drive as **exFAT**, then:
 
 ```bash
 git clone https://github.com/bnovik0v/portable-agent-usb.git
@@ -25,98 +47,125 @@ cd portable-agent-usb
 bash setup.sh /mnt/your-usb-drive
 ```
 
+The script downloads Node.js for both platforms, installs Claude Code and Codex, and sets up the launcher scripts. Takes a few minutes.
+
 ### 2. Authenticate
 
-You have two options:
+**Option A: OAuth (recommended)**
 
-**Option A: OAuth login (recommended for Pro/Max/Plus subscribers)**
-
-No API keys needed. Just launch the agent on first use — it opens a browser to log in. Your auth token is saved on the USB drive, so you only do this once.
+No API keys needed. Launch `claude` on first use — it opens a browser to log in. Your token is saved on the USB and works on any machine.
 
 ```bash
-# After running setup.sh, launch from the USB:
 bash /mnt/your-usb-drive/start.sh
-# Then type 'claude' — it will prompt you to log in via browser
+# type 'claude' — log in via browser
 ```
 
 **Option B: API keys**
 
-Edit the key files on the USB:
-
 ```bash
+# Edit the key files on the USB
 nano /mnt/your-usb-drive/config/env.sh       # Linux
-# Or edit config\env.bat with Notepad          # Windows
+notepad config\env.bat                         # Windows
 ```
 
-Set your keys:
 ```
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
 ```
 
-OAuth and API keys can coexist — if both are present, the API key takes priority.
+> Both methods can coexist. If an API key is present, it takes priority over OAuth.
 
-### 3. Add Your Skills (optional)
+### 3. Use it
 
-Copy your skill files into `config/.claude/skills/` on the USB drive.
-Edit `config/.claude/CLAUDE.md` with your global instructions.
+**Windows** — plug in, open the drive in File Explorer, double-click `start.bat`
 
-### 4. Use It
+**Linux** — plug in, open a terminal:
 
-**Windows:** Plug in the USB. When AutoPlay pops up, choose "Open folder". Double-click `start.bat`.
-
-**Linux:** Plug in the USB. Open a terminal and run:
 ```bash
-bash /media/$USER/PORTABLE-AGENT/start.sh
+bash /media/$USER/AGENT-USB/start.sh
 ```
 
-You'll get a terminal with `claude` and `codex` commands ready to use.
+```
+ ======================================
+  Portable Agent USB
+ ======================================
+  Type 'claude' for Claude Code
+  Type 'codex'  for OpenAI Codex
+  Type 'exit'   to close
+ ======================================
+```
+
+### 4. Customize (optional)
+
+| What | Where |
+|---|---|
+| Global instructions | `config/.claude/CLAUDE.md` |
+| Skills | `config/.claude/skills/` |
+| Startup behavior | `start.sh` / `start.bat` |
+
+## How It Works
+
+```
+USB Drive (exFAT)
+├── bin/
+│   ├── linux/node-v22.x/     ← Portable Node.js
+│   └── win/node-v22.x/
+├── tools/
+│   ├── linux/{claude,codex}/  ← npm packages per platform
+│   └── win/{claude,codex}/
+├── config/
+│   ├── .claude/               ← Your config, skills, auth token
+│   └── env.sh / env.bat       ← API keys (optional)
+├── temp/                      ← All temp/cache stays here
+├── start.sh                   ← Linux launcher
+└── start.bat                  ← Windows launcher
+```
+
+The launcher scripts set `PATH`, `CLAUDE_CONFIG_DIR`, `TMPDIR`, `APPDATA`, and other env vars to point everything at the USB. Nothing touches the host filesystem.
+
+## No Traces
+
+| What stays clean | How |
+|---|---|
+| No programs installed | Portable Node.js runs from USB |
+| No files in user profile | APPDATA / HOME / TEMP redirected to USB |
+| No npm cache on host | `NPM_CONFIG_CACHE` on USB |
+| No config on host | `CLAUDE_CONFIG_DIR` on USB |
+| Auth tokens portable | OAuth credentials saved on USB, not host |
+
+> OS-level artifacts (USB device history in Windows registry, mount logs on Linux) are unavoidable and harmless.
 
 ## Requirements
 
-- **USB drive:** 1GB+ (USB 3.0 recommended for speed)
-- **Host PC:** Windows 10/11 or Linux, x64 architecture
-- **Setup machine:** Linux with `curl`, `unzip`, and internet access
-- **Auth:** Anthropic/OpenAI API keys, OR a Claude Pro/Max or ChatGPT Plus subscription (OAuth)
-
-## How "No Traces" Works
-
-| Clean | How |
+| Requirement | Details |
 |---|---|
-| No programs installed | Portable Node.js runs from USB |
-| No files in user profile | APPDATA/HOME/TEMP redirected to USB |
-| No npm cache on host | NPM_CONFIG_CACHE on USB |
-| No config on host | CLAUDE_CONFIG_DIR on USB |
-| OAuth tokens on USB | Auth persists across machines, not on host |
-
-OS-level artifacts we can't prevent (and don't need to):
-- Windows USB device history in registry/Event Viewer
-- Linux mount logs in syslog
-
-This is fine — the goal is not to install anything, not to evade forensics.
-
-## USB Size
-
-| Component | ~Size |
-|---|---|
-| Node.js (2 platforms) | 100 MB |
-| Claude Code + Codex (2 platforms) | 400 MB |
-| Config and scripts | 1 MB |
-| **Total** | **~500 MB** |
-
-## Customization
-
-- Edit `config/.claude/CLAUDE.md` for Claude Code instructions
-- Add skills to `config/.claude/skills/`
-- Modify `start.bat` / `start.sh` to change startup behavior
+| USB drive | 1 GB+ (USB 3.0 recommended) |
+| Host PC | Windows 10/11 or Linux, x64 |
+| Setup machine | Linux with `curl` and `unzip` |
+| Auth | API keys **or** Claude Pro/Max / ChatGPT Plus subscription |
 
 ## Limitations
 
-- **x64 only** — won't work on ARM devices
-- **No auto-run** — modern OSes block auto-execution from USB for security. You click the launcher once.
-- **USB 2.0 is slow** — Node.js startup may take a few seconds. Use USB 3.0.
-- **Cross-platform npm install** — the setup script uses `--os=win32` flag. If a package doesn't support this, run `setup-windows.bat` on a Windows machine once.
+- **x64 only** — ARM devices not supported
+- **No auto-run** — modern OSes block USB auto-execution for security; you click the launcher once
+- **USB 2.0 is slow** — Node.js startup takes a few seconds; use USB 3.0
+- **Windows cross-install** — if `claude` crashes on Windows, run `setup-windows.bat` on a Windows machine once to reinstall native binaries
+
+## Contributing
+
+Contributions welcome! Some ideas:
+
+- macOS support
+- ARM64 support
+- Encrypted API key storage
+- Auto-update mechanism for Claude Code / Codex versions
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+---
+
+<p align="center">
+  <sub>Built for developers who help friends debug at 2 AM.</sub>
+</p>

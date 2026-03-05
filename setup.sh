@@ -5,6 +5,7 @@ set -euo pipefail
 
 USB="${1:?Usage: bash setup.sh /path/to/usb/mount}"
 NODE_VERSION="22.14.0"
+STAGING="/tmp/portable-agent-staging"
 
 # Verify target exists
 if [ ! -d "$USB" ]; then
@@ -14,23 +15,42 @@ fi
 
 echo "==> Building portable agent USB at: $USB"
 echo "    Node.js version: $NODE_VERSION"
+echo "    Staging area: $STAGING"
 echo ""
+
+# ── Helper: copy tree, resolving symlinks ────────────────────────────
+
+copy_resolved() {
+    # Copy $1 to $2, replacing symlinks with real files (exFAT has no symlinks)
+    rm -rf "$2"
+    cp -rL "$1" "$2"
+}
 
 # ── Directory structure ──────────────────────────────────────────────
 
 echo "==> Creating directory structure..."
 mkdir -p "$USB"/{bin/{win,linux},tools/{win/{claude-code,codex},linux/{claude-code,codex}},config/.claude/skills,temp}
 
-# ── Node.js binaries ────────────────────────────────────────────────
+# Clean any corrupted config from previous runs
+rm -f "$USB/config/.claude/.claude.json" "$USB/config/.claude/.credentials.json" 2>/dev/null
+mkdir -p "$STAGING"/{node-linux,tools-linux/{claude-code,codex},tools-win/{claude-code,codex}}
+
+# ── Node.js for Linux ───────────────────────────────────────────────
 
 if [ ! -d "$USB/bin/linux/node-v${NODE_VERSION}-linux-x64" ]; then
     echo "==> Downloading Node.js $NODE_VERSION for Linux..."
     curl -fSL --progress-bar \
         "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
-        | tar -xJ -C "$USB/bin/linux/"
+        | tar -xJ -C "$STAGING/node-linux/"
+
+    echo "==> Copying Node.js Linux to USB (resolving symlinks)..."
+    copy_resolved "$STAGING/node-linux/node-v${NODE_VERSION}-linux-x64" \
+                  "$USB/bin/linux/node-v${NODE_VERSION}-linux-x64"
 else
     echo "==> Node.js Linux already present, skipping."
 fi
+
+# ── Node.js for Windows ─────────────────────────────────────────────
 
 if [ ! -d "$USB/bin/win/node-v${NODE_VERSION}-win-x64" ]; then
     echo "==> Downloading Node.js $NODE_VERSION for Windows..."
@@ -44,39 +64,48 @@ else
     echo "==> Node.js Windows already present, skipping."
 fi
 
-LINUX_NODE="$USB/bin/linux/node-v${NODE_VERSION}-linux-x64/bin/node"
-LINUX_NPM="$USB/bin/linux/node-v${NODE_VERSION}-linux-x64/bin/npm"
+# Use staging Node.js for npm installs (symlinks work on local fs)
+LINUX_NODE="$STAGING/node-linux/node-v${NODE_VERSION}-linux-x64/bin/node"
+LINUX_NPM="$STAGING/node-linux/node-v${NODE_VERSION}-linux-x64/bin/npm"
 
-# ── Install tools for Linux ─────────────────────────────────────────
+# ── Install tools for Linux (in staging, then copy) ─────────────────
 
-echo "==> Installing Claude Code (Linux)..."
 if [ ! -d "$USB/tools/linux/claude-code/node_modules" ]; then
-    (cd "$USB/tools/linux/claude-code" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install @anthropic-ai/claude-code)
+    echo "==> Installing Claude Code (Linux)..."
+    (cd "$STAGING/tools-linux/claude-code" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install @anthropic-ai/claude-code)
+    echo "==> Copying to USB (resolving symlinks)..."
+    copy_resolved "$STAGING/tools-linux/claude-code" "$USB/tools/linux/claude-code"
 else
-    echo "    Already installed, skipping. Delete tools/linux/claude-code/node_modules to reinstall."
+    echo "==> Claude Code (Linux) already installed, skipping."
 fi
 
-echo "==> Installing Codex CLI (Linux)..."
 if [ ! -d "$USB/tools/linux/codex/node_modules" ]; then
-    (cd "$USB/tools/linux/codex" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install @openai/codex)
+    echo "==> Installing Codex CLI (Linux)..."
+    (cd "$STAGING/tools-linux/codex" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install @openai/codex)
+    echo "==> Copying to USB (resolving symlinks)..."
+    copy_resolved "$STAGING/tools-linux/codex" "$USB/tools/linux/codex"
 else
-    echo "    Already installed, skipping. Delete tools/linux/codex/node_modules to reinstall."
+    echo "==> Codex CLI (Linux) already installed, skipping."
 fi
 
-# ── Install tools for Windows (cross-platform) ──────────────────────
+# ── Install tools for Windows (in staging, then copy) ────────────────
 
-echo "==> Installing Claude Code (Windows, cross-platform)..."
 if [ ! -d "$USB/tools/win/claude-code/node_modules" ]; then
-    (cd "$USB/tools/win/claude-code" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install --os=win32 --cpu=x64 @anthropic-ai/claude-code)
+    echo "==> Installing Claude Code (Windows, cross-platform)..."
+    (cd "$STAGING/tools-win/claude-code" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install --os=win32 --cpu=x64 @anthropic-ai/claude-code)
+    echo "==> Copying to USB (resolving symlinks)..."
+    copy_resolved "$STAGING/tools-win/claude-code" "$USB/tools/win/claude-code"
 else
-    echo "    Already installed, skipping."
+    echo "==> Claude Code (Windows) already installed, skipping."
 fi
 
-echo "==> Installing Codex CLI (Windows, cross-platform)..."
 if [ ! -d "$USB/tools/win/codex/node_modules" ]; then
-    (cd "$USB/tools/win/codex" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install --os=win32 --cpu=x64 @openai/codex)
+    echo "==> Installing Codex CLI (Windows, cross-platform)..."
+    (cd "$STAGING/tools-win/codex" && "$LINUX_NPM" init -y --silent 2>/dev/null && "$LINUX_NPM" install --os=win32 --cpu=x64 @openai/codex)
+    echo "==> Copying to USB (resolving symlinks)..."
+    copy_resolved "$STAGING/tools-win/codex" "$USB/tools/win/codex"
 else
-    echo "    Already installed, skipping."
+    echo "==> Codex CLI (Windows) already installed, skipping."
 fi
 
 # ── Launcher scripts ────────────────────────────────────────────────
@@ -117,6 +146,51 @@ fi
 # ── Windows setup fallback script ───────────────────────────────────
 
 cp "$SCRIPT_DIR/setup-windows.bat" "$USB/setup-windows.bat"
+
+# ── Flush writes to USB ──────────────────────────────────────────────
+
+echo "==> Syncing writes to USB..."
+sync
+
+# ── Verify key binaries ─────────────────────────────────────────────
+
+echo "==> Verifying installation..."
+FAIL=0
+
+NODE_BIN="$USB/bin/linux/node-v${NODE_VERSION}-linux-x64/bin/node"
+if file "$NODE_BIN" | grep -q "ELF 64-bit"; then
+    echo "    Node.js binary: OK"
+else
+    echo "    ERROR: Node.js binary is corrupted!"
+    FAIL=1
+fi
+
+CLAUDE_BIN="$USB/tools/linux/claude-code/node_modules/.bin/claude"
+if [ -s "$CLAUDE_BIN" ]; then
+    echo "    Claude Code: OK ($(wc -c < "$CLAUDE_BIN") bytes)"
+else
+    echo "    ERROR: Claude Code binary is missing or empty!"
+    FAIL=1
+fi
+
+CODEX_BIN="$USB/tools/linux/codex/node_modules/.bin/codex"
+if [ -s "$CODEX_BIN" ]; then
+    echo "    Codex CLI: OK ($(wc -c < "$CODEX_BIN") bytes)"
+else
+    echo "    ERROR: Codex CLI binary is missing or empty!"
+    FAIL=1
+fi
+
+if [ "$FAIL" -eq 1 ]; then
+    echo ""
+    echo "ERROR: Verification failed. Try deleting the failed component and re-running setup."
+    exit 1
+fi
+
+# ── Cleanup staging ─────────────────────────────────────────────────
+
+echo "==> Cleaning up staging area..."
+rm -rf "$STAGING"
 
 # ── Done ─────────────────────────────────────────────────────────────
 

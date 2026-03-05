@@ -24,11 +24,9 @@ REM ── Claude Code + Codex on PATH ──
 set "PATH=%USB%\tools\win\claude-code\node_modules\.bin;%PATH%"
 set "PATH=%USB%\tools\win\codex\node_modules\.bin;%PATH%"
 
-REM ── API keys ──
+REM ── API keys (optional if using OAuth) ──
 if exist "%USB%\config\env.bat" (
     call "%USB%\config\env.bat"
-) else (
-    echo WARNING: config\env.bat not found. API keys not loaded.
 )
 
 REM ── Claude Code config ──
@@ -59,6 +57,18 @@ echo   Type 'claude' for Claude Code
 echo   Type 'codex'  for OpenAI Codex
 echo   Type 'exit'   to close
 echo  ======================================
+if "%ANTHROPIC_API_KEY%"=="YOUR_KEY_HERE" (
+    echo.
+    echo   No API key found - claude will
+    echo   prompt OAuth login on first use.
+    echo  ======================================
+)
+if not defined ANTHROPIC_API_KEY (
+    echo.
+    echo   No API key found - claude will
+    echo   prompt OAuth login on first use.
+    echo  ======================================
+)
 echo.
 
 cmd /k "cd /d %USERPROFILE%"

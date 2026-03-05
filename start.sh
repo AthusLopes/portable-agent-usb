@@ -19,11 +19,9 @@ export PATH="$NODE_DIR/bin:$PATH"
 export PATH="$USB/tools/linux/claude-code/node_modules/.bin:$PATH"
 export PATH="$USB/tools/linux/codex/node_modules/.bin:$PATH"
 
-# ── API keys ──
+# ── API keys (optional if using OAuth) ──
 if [ -f "$USB/config/env.sh" ]; then
     source "$USB/config/env.sh"
-else
-    echo "WARNING: config/env.sh not found. API keys not loaded."
 fi
 
 # ── Claude Code config ──
@@ -46,6 +44,11 @@ echo "  Type 'claude' for Claude Code"
 echo "  Type 'codex'  for OpenAI Codex"
 echo "  Type 'exit'   to close"
 echo " ======================================"
+if [ "${ANTHROPIC_API_KEY:-}" = "YOUR_KEY_HERE" ] || [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+    echo "  No API key found — claude will"
+    echo "  prompt OAuth login on first use."
+    echo " ======================================"
+fi
 echo ""
 
 cd "$HOME"

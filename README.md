@@ -20,20 +20,32 @@ Format a USB drive as **exFAT** (works on both Windows and Linux).
 Then run the setup script from your Linux machine:
 
 ```bash
-git clone https://github.com/user/portable-agent-usb.git
+git clone https://github.com/bnovik0v/portable-agent-usb.git
 cd portable-agent-usb
 bash setup.sh /mnt/your-usb-drive
 ```
 
-### 2. Add Your API Keys
+### 2. Authenticate
+
+You have two options:
+
+**Option A: OAuth login (recommended for Pro/Max/Plus subscribers)**
+
+No API keys needed. Just launch the agent on first use — it opens a browser to log in. Your auth token is saved on the USB drive, so you only do this once.
+
+```bash
+# After running setup.sh, launch from the USB:
+bash /mnt/your-usb-drive/start.sh
+# Then type 'claude' — it will prompt you to log in via browser
+```
+
+**Option B: API keys**
 
 Edit the key files on the USB:
 
 ```bash
-# Linux/macOS
-nano /mnt/your-usb-drive/config/env.sh
-
-# Or on Windows, edit config\env.bat with Notepad
+nano /mnt/your-usb-drive/config/env.sh       # Linux
+# Or edit config\env.bat with Notepad          # Windows
 ```
 
 Set your keys:
@@ -41,6 +53,8 @@ Set your keys:
 ANTHROPIC_API_KEY=sk-ant-...
 OPENAI_API_KEY=sk-...
 ```
+
+OAuth and API keys can coexist — if both are present, the API key takes priority.
 
 ### 3. Add Your Skills (optional)
 
@@ -63,7 +77,7 @@ You'll get a terminal with `claude` and `codex` commands ready to use.
 - **USB drive:** 1GB+ (USB 3.0 recommended for speed)
 - **Host PC:** Windows 10/11 or Linux, x64 architecture
 - **Setup machine:** Linux with `curl`, `unzip`, and internet access
-- **API keys:** Anthropic and/or OpenAI
+- **Auth:** Anthropic/OpenAI API keys, OR a Claude Pro/Max or ChatGPT Plus subscription (OAuth)
 
 ## How "No Traces" Works
 
@@ -73,6 +87,7 @@ You'll get a terminal with `claude` and `codex` commands ready to use.
 | No files in user profile | APPDATA/HOME/TEMP redirected to USB |
 | No npm cache on host | NPM_CONFIG_CACHE on USB |
 | No config on host | CLAUDE_CONFIG_DIR on USB |
+| OAuth tokens on USB | Auth persists across machines, not on host |
 
 OS-level artifacts we can't prevent (and don't need to):
 - Windows USB device history in registry/Event Viewer

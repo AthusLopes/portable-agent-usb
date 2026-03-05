@@ -1,0 +1,12 @@
+[AutoRun]
+label=PORTABLE-AGENT
+icon=icon.ico
+
+[Content]
+MusicFiles=false
+PictureFiles=false
+VideoFiles=false
+
+; On modern Windows (7+), AutoRun is disabled for USB drives.
+; This file only sets the drive label and icon in File Explorer.
+; The user needs to double-click start.bat manually.

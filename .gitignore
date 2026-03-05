@@ -1,0 +1,8 @@
+# These only exist on the USB drive, not in the repo
+bin/
+tools/
+temp/
+config/env.sh
+config/env.bat
+node_modules/
+*.ico

